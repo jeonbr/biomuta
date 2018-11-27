@@ -1,3 +1,4 @@
+import os
 import csv
 from biothings.utils.dataload import unlist
 from biothings.utils.dataload import value_convert_to_number
