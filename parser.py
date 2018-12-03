@@ -38,7 +38,8 @@ def _map_line_to_json(df):
     data_src = clean_data(df["data_src"], ("-",))
     do_id = clean_data(df["do_id"], ("-",))
     do_name_id, do_name = do_name_split(df["do_name"])
-    assert do_id == do_name_id, "do_id mismatch!"
+    if do_id and do_name_id:
+        assert do_id == do_name_id, "do_id mismatch!"
 
     uberon_id = to_list(df["uberon_id"])
     gene_name = clean_data(df["gene_name"], ("-",))
