@@ -114,7 +114,6 @@ def load_data(data_folder):
     assert len(index) == VALID_COLUMN_NO, "Expecting %s columns, but got %s" % (VALID_COLUMN_NO, len(index))
     index = [clean_index(s) for s in index]
     biomuta = (dict(zip(index, row)) for row in db_biomuta)
-    biomuta = filter(lambda row: row["index"] != "", biomuta)
     json_rows = map(_map_line_to_json, biomuta)
     json_rows = (row for row in json_rows if row)
     json_rows = sorted(json_rows, key=lambda row: row["_id"])
