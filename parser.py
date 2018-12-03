@@ -69,7 +69,7 @@ def _map_line_to_json(df):
             'do_id': {
                         do_id : do_id,
                         do_name : do_name
-                        }
+                        },
             'uberon_id': uberon_id,
             'gene_name': gene_name,
             'pmid': pmid_list,
