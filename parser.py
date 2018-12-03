@@ -5,7 +5,7 @@ from biothings.utils.dataload import merge_duplicate_rows, dict_sweep
 from utils.hgvs import get_hgvs_from_vcf
 from itertools import groupby
 
-VALID_COLUMN_NO = 17
+VALID_COLUMN_NO = 22
 
 '''this parser is for BioMuta v3.0(BioMuta3 Complete Dataset) downloaded from
 https://hive.biochemistry.gwu.edu/cgi-bin/prd/biomuta/servlet.cgi'''
@@ -14,70 +14,66 @@ https://hive.biochemistry.gwu.edu/cgi-bin/prd/biomuta/servlet.cgi'''
 # convert one snp to json
 def _map_line_to_json(df):
     # specific variable treatment
-    genomic_position = clean_data(df["genomic_position"],  ("-",))
-    if not genomic_position:
-        return
-    genomic_position_split = genomic_position.replace("chr", "").replace("-", ":").split(":")
-    chrom = genomic_position_split[0]
-    chromStart = genomic_position_split[1]
+    chrom = df["chr_id"]
+    pos = df["chr_pos"]
     if chrom == 'M':
         chrom = 'MT'
 
-    ref = df["ref_nuc"]
-    alt = df["var_nuc"]
+    ref = df["ref_nt"]
+    alt = df["alt_nt"]
 
-    HGVS = get_hgvs_from_vcf(chrom, int(chromStart), ref, alt, mutant_type=False)
-
-    index = df["index"]
-    uniprotkb_swiss_prot_id = clean_data(df["uniprotkb_swiss_prot_id"], ("-",))
-    gene_name = clean_data(df["gene_name"], ("-",))
-    refseq_nucleotide_id = clean_data(df["refseq_nucleotide_id"], ("-",))
-    position_nuc = clean_data(df["position_nuc"], ("-",))
-    position_aa = clean_data(df["position_aa"], ("-",))
+    HGVS = get_hgvs_from_vcf(chrom, int(pos), ref, alt, mutant_type=False)
+    
+    transcript_id = clean_data(df["transcript_id"], ("-",))
+    peptide_id = clean_data(df["peptide_id"], ("-",))
+    uniprot_ac = clean_data(df["uniprot_ac"], ("-",))
+    refseq_ac = clean_data(df["refseq_ac"], ("-",))
+    cds_pos = clean_data(df["cds_pos"], ("-",))
+    pep_pos = clean_data(df["pep_pos"], ("-",))
+    uniprot_pos = clean_data(df["uniprot_pos"], ("-",))
     ref_aa = clean_data(df["ref_aa"], ("-",))
-    var_aa = clean_data(df["var_aa"], ("-",))
-    polyphen = clean_data(df["polyphen"], ("-",))
-    pmid = clean_data(df["pmid"], ("-",))
+    alt_aa = clean_data(df["alt_aa"], ("-",))
+    mut_freq = clean_data(df["mut_freq"], ("-",))
+    data_src = clean_data(df["data_src"], ("-",))
+    do_id = clean_data(df["do_id"], ("-",))
+    do_name_id, do_name = do_name_split(df["do_name"])
+    assert do_id == do_name_id, "do_id mismatch!"
 
-    cancer_type = clean_data(df["cancer_type"], ("-",))
-    if cancer_type:
-        cancer_type_split = cancer_type.replace(" / ", ":").split(":")
-        assert len(cancer_type_split) == 3, "cancer_type split error : {} : {}".format(HGVS, cancer_type)
-        _d, doid, term = cancer_type_split
-        assert _d == "DOID", "cancer_type split error : {} : {}".format(HGVS, cancer_type)
-    else:
-        doid = None
-        term = None
+    uberon_id = to_list(df["uberon_id"])
+    gene_name = clean_data(df["gene_name"], ("-",))
+    pmid_list = to_list(df["pmid_list"])
+    site_prd = clean_data(df["site_prd"], ("-",))
+    site_ann = df["site_ann"]
 
-    source = clean_data(df["source"], ("-",))
-    vfunction = clean_data(df["function"], ("-",))
-    if vfunction:
-        vfunction = vfunction.split("|")
-    status = clean_data(df["status"], ("-",))
 
 # load as json data
     one_snp_json = {
         "_id": HGVS,
         "biomuta": {
-            'index': index,
-            'uniprotkb_swiss_prot_id': uniprotkb_swiss_prot_id,
-            'gene_name': gene_name,
-            'refseq_nucleotide_id': refseq_nucleotide_id,
-            'genomic_position': genomic_position,
-            'position_nuc': position_nuc,
-            'ref_nuc': ref,
-            'var_nuc': alt,
-            'position_aa': position_aa,
+            'chrom': chrom,
+            'pos': pos,
+            'ref': ref,
+            'alt': alt,
+            'transcript_id': transcript_id,
+            'peptide_id': peptide_id,
+            'uniprot_ac': uniprot_ac,
+            'refseq_ac': refseq_ac,
+            'cds_pos': cds_pos,
+            'pep_pos': pep_pos,
+            'uniprot_pos': uniprot_pos,
             'ref_aa': ref_aa,
-            'var_aa': var_aa,
-            'polyphen': polyphen,
-            'pmid': pmid,
-            'cancer_type': {
-                "DOID": doid,
-                "term": term },
-            'source': source,
-            'function': vfunction,
-            'status': status,
+            'alt_aa': alt_aa,
+            'mut_freq': mut_freq,
+            'data_src': data_src,
+            'do_id': {
+                        do_id : do_id,
+                        do_name : do_name
+                        }
+            'uberon_id': uberon_id,
+            'gene_name': gene_name,
+            'pmid': pmid_list,
+            'site_prd': site_prd,
+            'site_ann': site_ann,
         }
     }
     one_snp_json = value_convert_to_number(one_snp_json)
@@ -93,6 +89,20 @@ def clean_data(d, vals):
         return None
     else:
         return d
+
+def to_list(s, sep=";"):
+    if s:
+        return s.split(sep)
+    else:
+        return None
+
+def do_name_split(do_name):
+    if not do_name:
+        return None, None
+    do_id, do_name = do_name.split(" / ")
+    do_id = do_id.split(":")[1]
+    return do_id, do_name
+
 
 # open file, parse, pass to json mapper
 def load_data(data_folder):
