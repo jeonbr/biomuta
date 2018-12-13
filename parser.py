@@ -4,7 +4,7 @@ from biothings.utils.dataload import unlist
 from biothings.utils.dataload import value_convert_to_number
 from biothings.utils.dataload import merge_duplicate_rows, dict_sweep
 from utils.hgvs import get_hgvs_from_vcf
-from itertools import groupby
+from itertools import groupby, chain
 from tempfile import mkstemp
 from .csvsort import csvsort 
 
