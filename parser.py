@@ -5,6 +5,8 @@ from biothings.utils.dataload import value_convert_to_number
 from biothings.utils.dataload import merge_duplicate_rows, dict_sweep
 from utils.hgvs import get_hgvs_from_vcf
 from itertools import groupby
+from tempfile import mkstemp
+from .csvsort import csvsort 
 
 VALID_COLUMN_NO = 22
 
@@ -116,8 +118,30 @@ def load_data(data_folder):
     index = [clean_index(s) for s in index]
     biomuta = (dict(zip(index, row)) for row in db_biomuta)
     json_rows = map(_map_line_to_json, biomuta)
-    json_rows = (row for row in json_rows if row)
-    json_rows = sorted(json_rows, key=lambda row: row["_id"])
-    row_groups = (it for (key, it) in groupby(json_rows, lambda row: row["_id"]))
-    json_rows = (merge_duplicate_rows(rg, "biomuta") for rg in row_groups)
-    return (unlist(dict_sweep(row, vals=[None, ])) for row in json_rows)
+    json_rows = chain.from_iterable(json_rows)
+
+
+    fd_tmp, tmp_path = mkstemp(dir=data_folder)
+    
+    try:
+        with open(tmp_path, "w") as f:
+            dbwriter = csv.writer(f)
+            for doc in json_rows:
+                dbwriter.writerow([doc['_id'], json.dumps(doc)]) 
+
+        csvsort(tmp_path)
+
+        with open(tmp_path) as csvfile:
+            json_rows = csv.reader(csvfile)
+            json_rows = (json.loads(row[1]) for row in json_rows)
+            row_groups = (it for (key, it) in groupby(json_rows, lambda row: row["_id"]))
+            json_rows = (merge_duplicate_rows(rg, "biomuta") for rg in row_groups)
+        
+            res = yield from (unlist(dict_sweep(row, vals=[None, ])) for row in json_rows)
+            yield res
+
+    finally:
+        os.remove(tmp_path)
+
+
+
