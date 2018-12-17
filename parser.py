@@ -82,6 +82,7 @@ def _map_line_to_json(df):
         }
     }
     one_snp_json = value_convert_to_number(one_snp_json)
+    one_snp_json['chrom'] = str(one_snp_json['chrom'])
     return one_snp_json
 
 
