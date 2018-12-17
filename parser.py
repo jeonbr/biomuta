@@ -11,8 +11,8 @@ from .csvsort import csvsort
 
 VALID_COLUMN_NO = 22
 
-'''this parser is for BioMuta v3.0(BioMuta3 Complete Dataset) downloaded from
-https://hive.biochemistry.gwu.edu/cgi-bin/prd/biomuta/servlet.cgi'''
+'''this parser is for BioMuta v4.0(BioMuta v4.0 Complete Dataset) downloaded from
+https://hive.biochemistry.gwu.edu/prd//biomuta/content/biomuta-master.csv'''
 
 
 # convert one snp to json
