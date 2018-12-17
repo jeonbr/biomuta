@@ -71,8 +71,8 @@ def _map_line_to_json(df):
             'mut_freq': mut_freq,
             'data_src': data_src,
             'do_id': {
-                        do_id : do_id,
-                        do_name : do_name
+                        "do_id" : do_id,
+                        "do_name" : do_name
                         },
             'uberon_id': uberon_id,
             'gene_name': gene_name,
