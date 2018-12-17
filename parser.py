@@ -83,6 +83,7 @@ def _map_line_to_json(df):
     }
     one_snp_json = value_convert_to_number(one_snp_json)
     one_snp_json['biomuta']['chrom'] = str(one_snp_json['biomuta']['chrom'])
+    one_snp_json['biomuta']['do_id']['do_id'] = str(one_snp_json['biomuta']['do_id']['do_id'])
     return one_snp_json
 
 
