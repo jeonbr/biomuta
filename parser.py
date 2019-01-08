@@ -8,6 +8,7 @@ from itertools import groupby
 from tempfile import mkstemp
 import json
 from .csvsort import csvsort 
+import re
 
 VALID_COLUMN_NO = 22
 
@@ -47,8 +48,8 @@ def _map_line_to_json(df):
     uberon_id = to_list(df["uberon_id"])
     gene_name = clean_data(df["gene_name"], ("-",))
     pmid_list = to_list(df["pmid_list"])
-    site_prd = clean_data(df["site_prd"], ("-",))
-    site_ann = df["site_ann"]
+    site_prd = site_prd_parser(clean_data(df["site_prd"], ("-",)))
+    site_ann = site_ann_parser(df["site_ann"])
 
 
 # load as json data
@@ -77,7 +78,7 @@ def _map_line_to_json(df):
             'uberon_id': uberon_id,
             'gene_name': gene_name,
             'pmid': pmid_list,
-            'site_prd': site_prd,
+            'site_prd': {"polyphen_pred": site_prd["prediction"], "polyphen_score": site_prd["score"]}
             'site_ann': site_ann,
         }
     }
@@ -110,6 +111,27 @@ def do_name_split(do_name):
     do_id = do_id.split(":")[1]
     return do_id, do_name
 
+def site_prd_parser(s):
+    s = s.strip()
+    if s:
+        prd_count = len([match for match in re.finditer(":", s)])
+        assert prd_count == 1, "other site_prd: {}".format(s)
+        matched = re.match("polyphen:(.*) \(probability = ([0-9\.]*)\)", s)
+        assert matched, "polyphen parser error: {}".format(s)
+        return {"prediction": matched.group(0), "score": matched.group(1)}
+
+def ann_parser(ann):
+    s = ann.strip().split(":")
+    if len(s) == 1:
+        return s[0]
+    elif len(s) == 2:
+        return {s[0] : s[1]}
+    else:
+        raise ValueError("Not Adequate key:value or value format: {}".format(ann))
+
+def site_ann_parser(s):
+    anns = s.strip().split(";")
+    return [ ann_parser(ann) for ann in anns]
 
 # open file, parse, pass to json mapper
 def load_data(data_folder):
