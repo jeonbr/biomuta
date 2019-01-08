@@ -78,8 +78,8 @@ def _map_line_to_json(df):
             'uberon_id': uberon_id,
             'gene_name': gene_name,
             'pmid': pmid_list,
-            'site_prd': {"polyphen_pred": site_prd["prediction"], "polyphen_score": site_prd["score"]}
-            'site_ann': site_ann,
+            'site_prd': {"polyphen_pred": site_prd["prediction"], "polyphen_score": site_prd["score"]},
+            'site_ann': site_ann
         }
     }
     one_snp_json = value_convert_to_number(one_snp_json)
