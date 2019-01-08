@@ -78,7 +78,7 @@ def _map_line_to_json(df):
             'uberon_id': uberon_id,
             'gene_name': gene_name,
             'pmid': pmid_list,
-            'site_prd': {"polyphen_pred": site_prd["prediction"], "polyphen_score": site_prd["score"]},
+            'site_prd': site_prd,
             'site_ann': site_ann
         }
     }
@@ -112,13 +112,29 @@ def do_name_split(do_name):
     return do_id, do_name
 
 def site_prd_parser(s):
-    s = s.strip()
-    if s:
-        prd_count = len([match for match in re.finditer(":", s)])
-        assert prd_count == 1, "other site_prd: {}".format(s)
-        matched = re.match("polyphen:(.*) \(probability = ([0-9\.]*)\)", s)
-        assert matched, "polyphen parser error: {}".format(s)
-        return {"prediction": matched.group(0), "score": matched.group(1)}
+    prds = s.strip()
+    if prds:
+        prds = prds.split(";")
+        return [ prd_parser(prd) for prd in prds]
+
+def prd_parser(prd):
+    prd = prd.strip()
+    if prd.startswith("polyphen"):
+        prd_count = len([match for match in re.finditer(":", prd)])
+        assert prd_count == 1, "other site_prd: {}".format(prd)
+        matched = re.match("polyphen:(.*) \(probability = ([0-9\.]*)\)", prd)
+        assert matched, "polyphen parser error: {}".format(prd)
+        return {"prd": "polyphen", "prediction": matched.group(1), "score": matched.group(2)}
+
+    elif prd.startswith("netnglyc"):
+        prd_count = len([match for match in re.finditer(":", prd)])
+        assert prd_count == 1, "other site_prd: {}".format(prd)
+        matched = re.match(r"netnglyc:([^\|]*)\|(.*)", prd)
+        assert matched, "netnglyc parser error: {}".format(prd)
+        return {"prd": "netnglyc", "prediction": matched.group(2), "score": matched.group(1)}
+
+    else:
+        raise ValueError("No matching parser: {}".format(prd))
 
 def ann_parser(ann):
     s = ann.strip().split(":")
