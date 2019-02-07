@@ -122,8 +122,8 @@ def site_prd_parser(s):
     prds = s.strip()
     if prds:
         prds = prds.split(";")
-        prds = [ p for p in prds if p ]
         prds = [ prd_parser(prd) for prd in prds]
+        prds = [ p for p in prds if p ]
         
         result = defaultdict(list)
         
