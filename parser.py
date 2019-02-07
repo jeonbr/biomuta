@@ -82,9 +82,9 @@ def _map_line_to_json(df):
             'pmid': pmid_list,
         }
     }
-    if site_ann:
-        for dic in site_ann:
-            one_snp_json["biomuta"].update(dic)
+#    if site_ann:
+#        for dic in site_ann:
+#            one_snp_json["biomuta"].update(dic)
 
     if site_prd:
         one_snp_json["biomuta"].update(site_prd) 
@@ -124,7 +124,9 @@ def site_prd_parser(s):
         prds = prds.split(";")
         prds = [ p for p in prds if p ]
         prds = [ prd_parser(prd) for prd in prds]
+        
         result = defaultdict(list)
+        
         for d in prds:
             for k, v in d.items():
                 result[k].append(v)
