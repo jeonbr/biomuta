@@ -156,6 +156,15 @@ def ann_parser(ann):
     else:
         raise ValueError("Not Adequate key:value or value format: {}".format(ann))
 
+def site_ann_error_corrector(s):
+    """ Correct site_ann column error such as
+        Natural_Variant_Annotation:In 3MC1) (PubMed:26419238.
+        Natural_Variant_Annotation:In HAYOS) (Ref.19.
+        Natural_Variant_Annotation:In OPA1) (Ref.28.
+    """
+    return s.replace(") (PubMed:26419238.", "").replace(") (Ref.19.", "").replace(") (Ref.28.", "")
+        
+        
 def site_ann_parser(s):
     s = s.replace("; ", "|")
     anns = s.strip().split(";")
