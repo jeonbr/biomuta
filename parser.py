@@ -141,7 +141,8 @@ def prd_parser(prd):
         raise ValueError("No matching parser: {}".format(prd))
 
 def ann_parser(ann):
-    s = ann.strip().split(":")
+    s = site_ann_error_corrector(ann)
+    s = s.strip().split(":")
     if len(s) == 1:
         return None
     elif len(s) == 2:
