@@ -7,8 +7,10 @@ from utils.hgvs import get_hgvs_from_vcf
 from itertools import groupby
 from tempfile import mkstemp
 import json
-from .csvsort import csvsort 
 import re
+from collections import defaultdict
+
+from .csvsort import csvsort 
 
 VALID_COLUMN_NO = 22
 
@@ -78,14 +80,17 @@ def _map_line_to_json(df):
             'uberon_id': uberon_id,
             'gene_name': gene_name,
             'pmid': pmid_list,
-            'site_prd': site_prd,
+#            'site_prd': site_prd,
 #            'site_ann': site_ann
         }
     }
-    if site_prd:
-        for dic in site_prd:
+    if site_ann:
+        for dic in site_ann:
             one_snp_json["biomuta"].update(dic)
 
+    if site_prd:
+        one_snp_json["biomuta"].update(site_prd) 
+    
     one_snp_json = value_convert_to_number(one_snp_json)
     one_snp_json['biomuta']['chrom'] = str(one_snp_json['biomuta']['chrom'])
     one_snp_json['biomuta']['do_id']['do_id'] = str(one_snp_json['biomuta']['do_id']['do_id'])
@@ -119,7 +124,19 @@ def site_prd_parser(s):
     prds = s.strip()
     if prds:
         prds = prds.split(";")
-        return [ prd_parser(prd) for prd in prds]
+        prds = [ prd_parser(prd) for prd in prds]
+        result = defaultdict(list)
+        for d in prds:
+            for k, v in d.items():
+                result[k].append(v)
+        
+        for k, v in result.items():
+            if len(v) == 1:
+                result[k] = v[0]
+                
+        return dict(result)
+
+        
 
 def prd_parser(prd):
     prd = prd.strip()
@@ -128,14 +145,14 @@ def prd_parser(prd):
         assert prd_count == 1, "other site_prd: {}".format(prd)
         matched = re.match("polyphen:(.*) \(probability = ([0-9\.]*)\)", prd)
         assert matched, "polyphen parser error: {}".format(prd)
-        return {"prd": "polyphen", "prediction": matched.group(1), "score": matched.group(2)}
+        return {"polyphen" : {"prediction": matched.group(1), "score": matched.group(2)}}
 
     elif prd.startswith("netnglyc"):
         prd_count = len([match for match in re.finditer(":", prd)])
         assert prd_count == 1, "other site_prd: {}".format(prd)
         matched = re.match(r"netnglyc:([^\|]*)\|(.*)", prd)
         assert matched, "netnglyc parser error: {}".format(prd)
-        return {"prd": "netnglyc", "prediction": matched.group(2), "score": matched.group(1)}
+        return { "netnglyc" : { "prediction": matched.group(2), "score": matched.group(1)}}
 
     else:
         raise ValueError("No matching parser: {}".format(prd))
