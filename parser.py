@@ -82,9 +82,9 @@ def _map_line_to_json(df):
             'pmid': pmid_list,
         }
     }
-#    if site_ann:
-#        for dic in site_ann:
-#            one_snp_json["biomuta"].update(dic)
+    if site_ann:
+        for dic in site_ann:
+            one_snp_json["biomuta"].update(dic)
 
     if site_prd:
         one_snp_json["biomuta"].update(site_prd) 
@@ -146,7 +146,10 @@ def prd_parser(prd):
         assert prd_count == 1, "other site_prd: {}".format(prd)
         matched = re.match("polyphen:(.*) \(probability = ([0-9\.]*)\)", prd)
         assert matched, "polyphen parser error: {}".format(prd)
-        return {"polyphen" : {"prediction": matched.group(1), "score": matched.group(2)}}
+        prediction = matched.group(1)
+        score = matched.group(2)
+        if score and (prediction !="unknown"):
+            return {"polyphen" : {"prediction":prediction, "score": score}}
 
     elif prd.startswith("netnglyc"):
         prd_count = len([match for match in re.finditer(":", prd)])
