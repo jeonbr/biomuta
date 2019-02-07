@@ -7,7 +7,7 @@ from utils.hgvs import get_hgvs_from_vcf
 from itertools import groupby
 from tempfile import mkstemp
 import json
-from csvsort import csvsort 
+from .csvsort import csvsort 
 import re
 
 VALID_COLUMN_NO = 22
