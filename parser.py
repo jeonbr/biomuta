@@ -82,8 +82,9 @@ def _map_line_to_json(df):
 #            'site_ann': site_ann
         }
     }
-    for dic in site_prd:
-        one_snp_json["biomuta"].update(dic)
+    if site_prd:
+        for dic in site_prd:
+            one_snp_json["biomuta"].update(dic)
 
     one_snp_json = value_convert_to_number(one_snp_json)
     one_snp_json['biomuta']['chrom'] = str(one_snp_json['biomuta']['chrom'])
