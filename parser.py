@@ -149,8 +149,8 @@ def ann_parser(ann):
         v = s[1].split("|")
         if len(v) == 1 :
             return { k : {"value": v[0]}}
-        elif len(v) == 2:
-            return { k : {"value": v[0], "info":v[1]}}
+        elif len(v) >= 2:
+            return { k : {"value": v[0], "info":v[1:]}}
         else:
             raise ValueError("Not Adequate key:value format: {}".format(ann))
     else:
