@@ -146,7 +146,7 @@ def ann_parser(ann):
         return None
     elif len(s) == 2:
         k = s[0].lower().replace("-", "_").replace("_annotation", "")
-        v = v.split("|")
+        v = s[1].split("|")
         if len(v) == 1 :
             return { k : {"value": v[0]}}
         elif len(v) == 2:
