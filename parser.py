@@ -187,7 +187,8 @@ def site_ann_error_corrector(s):
 def site_ann_parser(s):
     s = s.replace("; ", "|")
     anns = s.strip().split(";")
-    return [ ann_parser(ann) for ann in anns]
+    anns = [ ann_parser(ann) for ann in anns]
+    return [ann for ann in anns if ann ]
 
 # open file, parse, pass to json mapper
 def load_data(data_folder):
