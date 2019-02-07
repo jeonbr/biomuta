@@ -79,9 +79,12 @@ def _map_line_to_json(df):
             'gene_name': gene_name,
             'pmid': pmid_list,
             'site_prd': site_prd,
-            'site_ann': site_ann
+#            'site_ann': site_ann
         }
     }
+    for dic in site_prd:
+        ons_snp_json["biomuta"].update(dic)
+
     one_snp_json = value_convert_to_number(one_snp_json)
     one_snp_json['biomuta']['chrom'] = str(one_snp_json['biomuta']['chrom'])
     one_snp_json['biomuta']['do_id']['do_id'] = str(one_snp_json['biomuta']['do_id']['do_id'])
@@ -139,13 +142,21 @@ def prd_parser(prd):
 def ann_parser(ann):
     s = ann.strip().split(":")
     if len(s) == 1:
-        return s[0]
+        return None
     elif len(s) == 2:
-        return {s[0] : s[1]}
+        k = s[0].lower().replace("-", "_").replace("_annotation", "")
+        v = v.split("|")
+        if len(v) == 1 :
+            return { k : {"value": v[0]}}
+        elif len(v) == 2:
+            return { k : {"value": v[0], "info":v[1]}}
+        else:
+            raise ValueError("Not Adequate key:value format: {}".format(ann))
     else:
         raise ValueError("Not Adequate key:value or value format: {}".format(ann))
 
 def site_ann_parser(s):
+    s = s.replace("; ", "|")
     anns = s.strip().split(";")
     return [ ann_parser(ann) for ann in anns]
 
