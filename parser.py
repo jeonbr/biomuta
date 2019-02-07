@@ -80,8 +80,6 @@ def _map_line_to_json(df):
             'uberon_id': uberon_id,
             'gene_name': gene_name,
             'pmid': pmid_list,
-#            'site_prd': site_prd,
-#            'site_ann': site_ann
         }
     }
     if site_ann:
@@ -124,6 +122,7 @@ def site_prd_parser(s):
     prds = s.strip()
     if prds:
         prds = prds.split(";")
+        prds = [ p for p in prds if p ]
         prds = [ prd_parser(prd) for prd in prds]
         result = defaultdict(list)
         for d in prds:
