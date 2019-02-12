@@ -4,6 +4,7 @@
         "data_url" : "https://hive.biochemistry.gwu.edu/prd//biomuta/content/biomuta-master.csv",
         "uncompress" : false
     },
+    "requires" : "csvsort",
     "uploader" : {
         "parser" : "parser:load_data",
         "ignore_duplicates" : false
