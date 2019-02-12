@@ -10,7 +10,7 @@ import json
 import re
 from collections import defaultdict
 
-from .csvsort import csvsort 
+from csvsort import csvsort 
 
 VALID_COLUMN_NO = 22
 
